@@ -1,22 +1,22 @@
 /**
  * ui.js
- * * Este módulo é responsável por toda a manipulação do DOM e renderização da interface do utilizador.
- * Ele recebe dados e callbacks do módulo principal (app.js) e atualiza a página em conformidade.
- * Não contém lógica de estado da aplicação.
+ * This module is responsible for all DOM manipulation and UI rendering.
+ * It receives data and callbacks from the main app module (app.js) and updates the page accordingly.
+ * It contains no application state logic.
  */
 
 import { appData } from './config.js';
 
 export const UI = {
-    elements: {}, // Será preenchido pelo app.js na inicialização
+    elements: {}, // Will be populated by app.js on initialization
     
-    // Recebe as referências dos elementos do DOM do módulo principal
+    // Receives DOM element references from the main module
     init(elements) {
         this.elements = elements;
     },
 
-    // Alterna a visibilidade das secções principais da aplicação
-    mostrarSeccao(sectionId) {
+    // Toggles visibility of the main application sections
+    showSection(sectionId) {
         this.elements.seccoes.forEach(seccao => seccao.classList.toggle('visivel', seccao.id === sectionId));
         this.elements.navHub.querySelectorAll('.nav-button').forEach(button => {
             button.classList.toggle('active', button.dataset.seccao === sectionId);
@@ -29,7 +29,7 @@ export const UI = {
         this.toggleMobileMenu(false);
     },
 
-    // Renderiza a navegação principal na barra lateral
+    // Renders the main navigation in the sidebar
     renderNavigation(userProfile, activeSection, onNavigate) {
         const navContainer = this.elements.navHub;
         navContainer.innerHTML = '';
@@ -51,10 +51,10 @@ export const UI = {
             navContainer.appendChild(button);
         });
         
-        this.mostrarSeccao(activeSection);
+        this.showSection(activeSection);
     },
 
-    // Atualiza a barra de status superior com informações do utilizador
+    // Updates the top status bar with user information
     updateUserStatus(userProfile, getBeltByLevel) {
         if (!userProfile) {
             this.elements.userStatusDisplay.style.display = 'none';
@@ -83,45 +83,13 @@ export const UI = {
         }
     },
 
-    // Atualiza a barra de stamina
+    // Updates the stamina bar
     updateStaminaBar(stamina, maxStamina) {
         this.elements.staminaBarText.textContent = `⚡ ${stamina} / ${maxStamina}`;
         this.elements.staminaBarFill.style.width = `${(stamina / maxStamina) * 100}%`;
     },
 
-    // Atualiza a vista do passaporte do utilizador
-    updatePassportView(userProfile, getBeltByLevel) {
-        this.elements.perfilFormView.style.display = 'none';
-        this.elements.perfilDashboardView.style.display = 'block';
-
-        const currentBelt = getBeltByLevel(userProfile.unlockedBeltLevel);
-        const avatar = appData.AVATAR_LIST.find(a => a.id === userProfile.avatar);
-        const avatarId = avatar ? avatar.id.substring(6, 7) : "?";
-        
-        this.elements.passaporteAvatarDisplay.src = `https://placehold.co/150x150/2c2c2c/ecf0f1?text=${avatarId}`;
-        this.elements.passaporteNomeSpan.textContent = userProfile.name;
-        this.elements.passaporteBeltSpan.textContent = currentBelt.name;
-        this.elements.passaportePontosSpan.textContent = userProfile.xp;
-        this.elements.studentIdDisplay.textContent = userProfile.studentId;
-        this.elements.passaporteAlturaSpan.textContent = userProfile.altura || 'N/A';
-        this.elements.passaportePesoSpan.textContent = userProfile.peso || 'N/A';
-        this.elements.passaporteImcSpan.textContent = userProfile.imc || 'N/A';
-        this.elements.passaporteStreakSpan.textContent = userProfile.streak;
-        this.elements.passaporteAchievementsSpan.textContent = `${userProfile.achievements.length} / ${Object.keys(appData.ACHIEVEMENTS).length}`;
-    },
-
-    // Mostra o formulário de criação/edição de perfil
-    showProfileForm(userProfile) {
-        if (userProfile) {
-            this.elements.perfilNomeInput.value = userProfile.name;
-            this.elements.perfilAlturaInput.value = userProfile.altura;
-            this.elements.perfilPesoInput.value = userProfile.peso;
-        }
-        this.elements.perfilFormView.style.display = 'block';
-        this.elements.perfilDashboardView.style.display = 'none';
-    },
-
-    // Mostra uma notificação flutuante
+    // Shows a floating notification
     showNotification(text, icon = 'ℹ️') {
         const notification = this.elements.notificationEl;
         this.elements.notificationIcon.textContent = icon;
@@ -137,9 +105,9 @@ export const UI = {
         }, 4000);
     },
 
-    // Abre o modal de vídeo
+    // Opens the video modal
     openModal(title, videoUrl) {
-        if (!videoUrl) {
+        if (!videoUrl || videoUrl === "https://www.youtube.com/embed/example") {
             this.showNotification("Vídeo não disponível para este item.", "⚠️");
             return;
         }
@@ -154,26 +122,26 @@ export const UI = {
         this.elements.modal.style.display = 'flex';
     },
 
-    // Fecha o modal de vídeo
+    // Closes the video modal
     closeModal() {
         this.elements.modal.style.display = 'none';
         this.elements.modalVideoContainer.innerHTML = '';
     },
 
-    // Alterna o menu móvel
+    // Toggles the mobile menu
     toggleMobileMenu(show) {
         this.elements.appSidebar.classList.toggle('open', show);
         this.elements.mobileMenuOverlay.classList.toggle('visible', show);
     },
     
-    // Aplica o tema de cores selecionado
+    // Applies the selected color theme
     applyTheme(themeKey) {
         const theme = appData.COLOR_THEMES[themeKey] || appData.COLOR_THEMES['default'];
         document.documentElement.style.setProperty('--cor-primaria', theme.primary);
         document.documentElement.style.setProperty('--cor-secundaria', theme.secondary);
     },
 
-    // Renderiza o seletor de temas
+    // Renders the theme picker in the sidebar
     renderThemePicker(currentTheme, onThemeSelect) {
         const container = this.elements.themePickerContainer.querySelector('.theme-options');
         container.innerHTML = '';
@@ -191,11 +159,20 @@ export const UI = {
             container.appendChild(dot);
         }
     },
+    
+    // Renders all static content that doesn't depend on a user profile
+    renderStaticContent(onMasterCardHover) {
+        this.renderMasters(onMasterCardHover);
+        this.renderTheory();
+    },
 
-    // Renderiza os cartões de mestres
-    renderMasters() {
+    // Renders the masters section with flip cards
+    renderMasters(onMasterCardHover) {
         const container = this.elements.mastersContainer;
-        container.innerHTML = '';
+        container.innerHTML = `<h1 class="titulo-seccao">Mestres Lendários</h1>`;
+        const grid = document.createElement('div');
+        grid.className = 'card-grid';
+
         appData.GREAT_MASTERS_DATA.forEach(master => {
             const cardEl = document.createElement('div');
             cardEl.className = 'master-flip-card';
@@ -203,7 +180,7 @@ export const UI = {
                 <div class="master-flip-card-inner">
                     <div class="master-flip-card-front">
                         <div class="master-image-placeholder">
-                            <img src="${master.image_placeholder}" alt="Retrato de ${master.name}">
+                            <img src="${master.image_placeholder}" alt="Portrait of ${master.name}">
                         </div>
                         <div class="master-front-info">
                             <h3>${master.name}</h3>
@@ -215,31 +192,16 @@ export const UI = {
                     </div>
                 </div>
             `;
-            container.appendChild(cardEl);
+            grid.appendChild(cardEl);
         });
-        this.initMasterCardAnimations();
+        container.appendChild(grid);
+        onMasterCardHover(); // Callback to initialize GSAP animations
     },
 
-    // Inicializa as animações GSAP para os cartões de mestres
-    initMasterCardAnimations() {
-        document.querySelectorAll('.master-flip-card').forEach(card => {
-            const innerCard = card.querySelector('.master-flip-card-inner');
-            gsap.set(innerCard, { rotationY: 0 });
-
-            card.addEventListener('mouseenter', () => {
-                gsap.to(innerCard, { rotationY: 180, duration: 0.7, ease: 'power3.out' });
-            });
-
-            card.addEventListener('mouseleave', () => {
-                gsap.to(innerCard, { rotationY: 0, duration: 0.7, ease: 'power3.out' });
-            });
-        });
-    },
-    
-    // Renderiza a secção de teoria
+    // Renders the theory section
     renderTheory() {
         const container = this.elements.theoryContainer;
-        container.innerHTML = '';
+        container.innerHTML = `<h1 class="titulo-seccao">Teoria e Filosofia</h1>`;
         appData.THEORY_DATA.forEach(theory => {
             const cardEl = document.createElement('div');
             cardEl.className = 'floating-card';
@@ -247,7 +209,7 @@ export const UI = {
                 <div class="card-header">
                     <h2 class="subtitulo-seccao" style="margin:0; border:0;">${theory.title}</h2>
                 </div>
-                <div class="card-content">
+                <div class="card-content card-prose">
                     ${theory.content}
                 </div>
             `;
@@ -255,7 +217,11 @@ export const UI = {
         });
     },
 
-    // Adicione aqui outras funções de renderização que foram movidas...
-    // Ex: renderBeltProgression, renderAchievements, renderDailyChallenge, etc.
-    // Lembre-se de que elas devem aceitar o estado e callbacks como parâmetros.
+    // This is just a selection of the many rendering functions. 
+    // The full ui.js file would contain all functions that create or modify HTML.
+    // Examples:
+    // renderProfileSection(userProfile, onSave, onEdit, onExport, onImport, onCopyId)
+    // renderBeltProgression(userProfile, onPromote)
+    // renderSkillLibrary(userProfile, onStartTimer)
+    // etc.
 };

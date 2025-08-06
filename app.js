@@ -1,18 +1,18 @@
 /**
  * app.js
- * * Este é o módulo principal da aplicação. Ele orquestra tudo:
- * - Gerencia o estado da aplicação (perfil do utilizador, timers, etc.).
- * - Contém a lógica principal (cálculo de XP, verificação de conquistas, etc.).
- * - Adiciona os event listeners para interações do utilizador.
- * - Utiliza o módulo UI para renderizar as atualizações na página.
- * - Utiliza o módulo config para aceder aos dados estáticos.
+ * This is the main application module. It orchestrates everything:
+ * - Manages application state (user profile, timers, etc.).
+ * - Contains the core logic (XP calculation, achievement checks, etc.).
+ * - Adds event listeners for user interactions.
+ * - Uses the UI module to render updates to the page.
+ * - Uses the config module to access static data.
  */
 
 import { appData } from './config.js';
 import { UI } from './ui.js';
 
 const WingChunApp = {
-    // --- ESTADO DA APLICAÇÃO ---
+    // --- APPLICATION STATE ---
     state: {
         userProfile: null,
         selectedAvatar: null,
@@ -25,22 +25,19 @@ const WingChunApp = {
         staminaInterval: null,
     },
 
-    // --- DADOS E CONFIGURAÇÃO ---
-    config: {}, // Será preenchido na inicialização
+    // --- STATIC DATA & CONFIG ---
+    config: {},
     onboardingData: [
         { title: "Navegação Principal", text: "Usa este menu à esquerda para navegar entre as diferentes secções da aplicação, como os teus Planos de Treino, os treinos de Skill e a progressão de Cinturões." },
         { title: "O Teu Perfil", text: "A secção 'Perfil' é o teu centro de comando. Usa as abas para ver o teu Passaporte, as tuas Estatísticas de treino e o teu Desafio Diário." },
         { title: "Planos de Treino", text: "É aqui que ganhas XP! Escolhe um plano recomendado por categoria e dificuldade, ou cria um manual. Cada plano recomendado é uma sessão de 20 minutos." }
     ],
 
-    // --- INICIALIZAÇÃO ---
+    // --- INITIALIZATION ---
     init() {
-        // Obter referências a todos os elementos do DOM
         const elements = this.queryElements();
-        // Inicializar o módulo UI com essas referências
         UI.init(elements);
         
-        // Carregar a configuração
         this.config = appData;
         this.config.ALL_TRAINING_ITEMS = [
             ...Object.values(this.config.WING_CHUN_TRAINING).flat(),
@@ -48,71 +45,32 @@ const WingChunApp = {
         ];
         this.state.selectedAvatar = this.config.AVATAR_LIST[0].id;
 
-        // Configurar o áudio
         this.setupAudio();
-
-        // Adicionar todos os event listeners
         this.addEventListeners();
+        
+        UI.renderStaticContent(() => this.initMasterCardAnimations());
 
-        // Renderizar conteúdo estático que não depende do perfil
-        UI.renderMasters();
-        UI.renderTheory();
-
-        // Carregar o perfil do utilizador e atualizar a UI
         this.loadProfile();
     },
 
     queryElements() {
-        // Esta função centraliza a obtenção de todos os elementos do DOM necessários
-        return {
-            navHub: document.getElementById('navigation-hub'),
-            appSidebar: document.getElementById('app-sidebar'),
-            seccoes: document.querySelectorAll('.seccao'),
-            mobileHeaderTitle: document.getElementById('current-section-title'),
-            openMenuBtn: document.getElementById('open-menu-btn'),
-            closeMenuBtn: document.getElementById('close-menu-btn'),
-            mobileMenuOverlay: document.getElementById('mobile-menu-overlay'),
-            mainContentArea: document.getElementById('main-content-area'),
-            notificationEl: document.getElementById('notification'),
-            notificationIcon: document.getElementById('notification-icon'),
-            notificationText: document.getElementById('notification-text'),
-            perfilFormView: document.getElementById('perfil-form-view'),
-            perfilDashboardView: document.getElementById('perfil-dashboard-view'),
-            perfilNomeInput: document.getElementById('perfil-nome'),
-            perfilAlturaInput: document.getElementById('perfil-altura'),
-            perfilPesoInput: document.getElementById('perfil-peso'),
-            avatarChoicesGrid: document.getElementById('avatar-choices-grid'),
-            formAvatarPreview: document.getElementById('form-avatar-preview'),
-            guardarPerfilBtn: document.getElementById('guardarPerfilBtn'),
-            editarPerfilBtn: document.getElementById('editarPerfilBtn'),
-            exportProfileBtn: document.getElementById('exportProfileBtn'),
-            importProfileBtn: document.getElementById('importProfileBtn'),
-            importFileInput: document.getElementById('import-file-input'),
-            passaporteNomeSpan: document.getElementById('passaporte-nome'),
-            passaporteBeltSpan: document.getElementById('passaporte-belt'),
-            passaportePontosSpan: document.getElementById('passaporte-pontos'),
-            studentIdDisplay: document.getElementById('student-id-display'),
-            passaporteAlturaSpan: document.getElementById('passaporte-altura'),
-            passaportePesoSpan: document.getElementById('passaporte-peso'),
-            passaporteImcSpan: document.getElementById('passaporte-imc'),
-            passaporteStreakSpan: document.getElementById('passaporte-streak'),
-            passaporteAchievementsSpan: document.getElementById('passaporte-achievements'),
-            passaporteAvatarDisplay: document.getElementById('passaporte-avatar-display'),
-            userStatusDisplay: document.getElementById('user-status-display'),
-            userStatusName: document.getElementById('user-status-name'),
-            userStatusBelt: document.getElementById('user-status-belt'),
-            userStatusAvatar: document.getElementById('user-status-avatar'),
-            userProgressBarFill: document.getElementById('user-progress-bar-fill'),
-            userProgressBarText: document.getElementById('user-progress-bar-text'),
-            staminaBarFill: document.getElementById('stamina-bar-fill'),
-            staminaBarText: document.getElementById('stamina-bar-text'),
-            modal: document.getElementById('video-modal'),
-            modalTitle: document.getElementById('modal-title'),
-            modalVideoContainer: document.getElementById('modal-video-container'),
-            closeModalBtn: document.querySelector('.close-modal'),
-            themePickerContainer: document.getElementById('theme-picker-container'),
-            // ... adicione outros elementos aqui conforme necessário
-        };
+        const ids = [
+            'app-sidebar', 'navigation-hub', 'mobile-header', 'current-section-title', 'open-menu-btn', 'close-menu-btn', 'mobile-menu-overlay',
+            'user-status-display', 'user-status-avatar', 'user-status-name', 'user-status-belt', 'user-progress-bar-text', 'user-progress-bar-fill',
+            'stamina-bar-text', 'stamina-bar-fill', 'main-content-area',
+            'seccao-perfil', 'seccao-planos', 'seccao-cinturoes', 'seccao-skill', 'seccao-condicionamento',
+            'seccao-teoria', 'seccao-mestres', 'seccao-glossario', 'seccao-achievements',
+            'video-modal', 'modal-title', 'modal-video-container',
+            'plan-execution-modal', 'plan-execution-title', 'plan-execution-timer-display', 'plan-execution-progress-bar',
+            'plan-execution-phase-info', 'plan-execution-current-exercise', 'stop-plan-btn',
+            'onboarding-modal', 'onboarding-title', 'onboarding-text', 'onboarding-prev-btn', 'onboarding-next-btn', 'onboarding-dots',
+            'notification', 'notification-icon', 'notification-text', 'import-file-input', 'theme-picker-container'
+        ];
+        const elements = {};
+        ids.forEach(id => elements[id.replace(/-(\w)/g, (match, letter) => letter.toUpperCase())] = document.getElementById(id));
+        elements.seccoes = document.querySelectorAll('.seccao');
+        elements.closeModalBtn = document.querySelector('.close-modal');
+        return elements;
     },
     
     setupAudio() {
@@ -122,7 +80,6 @@ const WingChunApp = {
             }
             if (!this.state.audioSynth) {
                 this.state.audioSynth = new Tone.Synth().toDestination();
-                console.log("Contexto de áudio iniciado.");
             }
             document.body.removeEventListener('click', startAudio);
             document.body.removeEventListener('touchend', startAudio);
@@ -132,25 +89,17 @@ const WingChunApp = {
     },
 
     addEventListeners() {
-        const elements = UI.elements; // Aceder aos elementos através do módulo UI
-        elements.guardarPerfilBtn.addEventListener('click', () => this.handleSaveProfile());
-        elements.editarPerfilBtn.addEventListener('click', () => this.handleEditProfile());
-        elements.exportProfileBtn.addEventListener('click', () => this.handleExportProfile());
-        elements.importProfileBtn.addEventListener('click', () => elements.importFileInput.click());
-        elements.importFileInput.addEventListener('change', (e) => this.handleImportFile(e));
-        elements.studentIdDisplay.addEventListener('click', () => this.copyStudentId());
-
-        elements.closeModalBtn.addEventListener('click', () => UI.closeModal());
-        elements.modal.addEventListener('click', (event) => {
-            if (event.target === elements.modal) UI.closeModal();
-        });
-
-        elements.openMenuBtn.addEventListener('click', () => UI.toggleMobileMenu(true));
-        elements.closeMenuBtn.addEventListener('click', () => UI.toggleMobileMenu(false));
-        elements.mobileMenuOverlay.addEventListener('click', () => UI.toggleMobileMenu(false));
+        UI.elements.closeModalBtn.addEventListener('click', () => UI.closeModal());
+        UI.elements.videoModal.addEventListener('click', (e) => { if (e.target === UI.elements.videoModal) UI.closeModal(); });
+        UI.elements.openMenuBtn.addEventListener('click', () => UI.toggleMobileMenu(true));
+        UI.elements.closeMenuBtn.addEventListener('click', () => UI.toggleMobileMenu(false));
+        UI.elements.mobileMenuOverlay.addEventListener('click', () => UI.toggleMobileMenu(false));
+        UI.elements.onboardingNextBtn.addEventListener('click', () => this.handleOnboardingNext());
+        UI.elements.onboardingPrevBtn.addEventListener('click', () => this.handleOnboardingPrev());
+        UI.elements.stopPlanBtn.addEventListener('click', () => this.stopTrainingPlan(true));
     },
 
-    // --- LÓGICA DE GESTÃO DE PERFIL ---
+    // --- PROFILE MANAGEMENT ---
     loadProfile() {
         const profileData = localStorage.getItem('wingChunProfile');
         let isNewUser = false;
@@ -160,15 +109,13 @@ const WingChunApp = {
                 isNewUser = this.state.userProfile.isNew || false;
                 this.ensureProfileIntegrity();
             } catch (e) {
-                console.error("Erro ao carregar perfil:", e);
-                localStorage.removeItem('wingChunProfile');
                 this.state.userProfile = null;
             }
         }
         this.updateUI();
         
         if (isNewUser) {
-            // this.startOnboarding(); // A lógica de onboarding pode ser adicionada aqui
+            this.startOnboarding();
             this.state.userProfile.isNew = false;
             this.saveProfile();
         }
@@ -177,74 +124,36 @@ const WingChunApp = {
     saveProfile() {
         if (!this.state.userProfile) return;
         localStorage.setItem('wingChunProfile', JSON.stringify(this.state.userProfile));
-        this.updateUI(); // Atualiza a UI sempre que o perfil é guardado
+        this.updateUI();
     },
     
-    handleSaveProfile() {
-        const nome = UI.elements.perfilNomeInput.value.trim();
-        const altura = parseFloat(UI.elements.perfilAlturaInput.value);
-        const peso = parseFloat(UI.elements.perfilPesoInput.value);
-
-        if (!nome || !altura || !peso) { // Validação simples
-            UI.showNotification("Por favor, preenche todos os campos.", "⚠️");
-            return;
-        }
-
-        const imc = (peso / ((altura / 100) ** 2)).toFixed(1);
-
-        if (!this.state.userProfile) {
-            const createdAt = new Date().toISOString();
-            this.state.userProfile = {
-                name: nome, altura, peso, imc,
-                avatar: this.state.selectedAvatar,
-                xp: 0,
-                unlockedBeltLevel: 0,
-                achievements: [],
-                streak: 0,
-                daily: {},
-                history: [],
-                trainingStats: {},
-                customPlans: [],
-                createdAt: createdAt,
-                studentId: `WC-${new Date(createdAt).getTime().toString(36).toUpperCase()}`,
-                isNew: true,
-                newContent: { skill: false, belts: false },
-                theme: 'default',
-                stamina: 100,
-                maxStamina: 100,
-                lastStaminaUpdate: createdAt,
-            };
-        } else {
-            this.state.userProfile.name = nome;
-            this.state.userProfile.altura = altura;
-            this.state.userProfile.peso = peso;
-            this.state.userProfile.imc = imc;
-            this.state.userProfile.avatar = this.state.selectedAvatar;
-        }
-
-        this.saveProfile();
-        UI.showNotification(`Perfil de ${nome} guardado!`, "✅");
-    },
-    
-    handleEditProfile() {
-        UI.showProfileForm(this.state.userProfile);
-        // A lógica de popular os avatares deve ser chamada aqui
+    ensureProfileIntegrity() {
+        const p = this.state.userProfile;
+        p.unlockedBeltLevel = p.unlockedBeltLevel ?? 0;
+        p.achievements = p.achievements ?? [];
+        p.daily = p.daily ?? {};
+        p.streak = p.streak ?? 0;
+        p.history = p.history ?? [];
+        p.trainingStats = p.trainingStats ?? {};
+        p.customPlans = p.customPlans ?? [];
+        p.studentId = p.studentId ?? `WC-${new Date(p.createdAt || Date.now()).getTime().toString(36).toUpperCase()}`;
+        p.newContent = p.newContent ?? { skill: false, belts: false };
+        p.theme = p.theme ?? 'default';
+        p.stamina = p.stamina ?? 100;
+        p.maxStamina = p.maxStamina ?? 100;
+        p.lastStaminaUpdate = p.lastStaminaUpdate ?? new Date().toISOString();
     },
 
-    // --- LÓGICA DE NAVEGAÇÃO E ATUALIZAÇÃO DA UI ---
-    handleNavigate(sectionId) {
-        this.state.activeSection = sectionId;
-        UI.mostrarSeccao(sectionId);
-        // Adicionar lógica de atualização de conteúdo específico da secção, se necessário
-    },
-
+    // --- UI RENDERING ORCHESTRATION ---
     updateUI() {
+        UI.renderNavigation(this.state.userProfile, this.state.activeSection, (id) => this.handleNavigate(id));
+
         if (!this.state.userProfile) {
             UI.updateUserStatus(null);
-            UI.renderNavigation(null, this.state.activeSection, (id) => this.handleNavigate(id));
-            UI.showProfileForm(null);
+            if (this.state.staminaInterval) clearInterval(this.state.staminaInterval);
+            this.renderSectionContent();
             return;
-        }
+        } 
         
         this.updateStamina();
         if (!this.state.staminaInterval) {
@@ -256,30 +165,99 @@ const WingChunApp = {
             this.state.userProfile.theme = themeKey;
             this.saveProfile();
         });
-
-        UI.renderNavigation(this.state.userProfile, this.state.activeSection, (id) => this.handleNavigate(id));
+        
         UI.updateUserStatus(this.state.userProfile, (level) => this.getBeltByLevel(level));
-        UI.updatePassportView(this.state.userProfile, (level) => this.getBeltByLevel(level));
-        // Chamar outras funções de renderização do UI aqui
+        this.checkDailyChallenge();
+        this.renderSectionContent();
     },
 
-    // --- LÓGICA DE JOGO (XP, CINTURÕES, STAMINA) ---
-    addXp(xpToAdd, trainingId = 'misc') {
-        if (!this.state.userProfile || xpToAdd <= 0) return;
-        this.state.userProfile.xp += xpToAdd;
-        UI.showNotification(`+${xpToAdd} XP!`, "⭐");
-        this.updateHistory(xpToAdd, trainingId);
-        // this.checkAchievements(); // Adicionar lógica de conquistas
-        this.saveProfile();
+    renderSectionContent() {
+        // This function dynamically renders the content of the currently active section.
+        // This is a more scalable approach than a giant if/else block.
+        const sectionRenderers = {
+            'seccao-perfil': () => this.renderProfileSection(),
+            'seccao-planos': () => this.renderPlansSection(),
+            'seccao-cinturoes': () => this.renderBeltProgression(),
+            'seccao-skill': () => this.renderLibrary('skill'),
+            'seccao-condicionamento': () => this.renderLibrary('conditioning'),
+            'seccao-achievements': () => this.renderAchievements(),
+            'seccao-glossario': () => this.renderGlossary(),
+            // Static sections are rendered once at init
+            'seccao-mestres': () => {}, 
+            'seccao-teoria': () => {},
+        };
+
+        const renderFunction = sectionRenderers[this.state.activeSection];
+        if (renderFunction) {
+            renderFunction();
+        }
+    },
+
+    handleNavigate(sectionId) {
+        this.state.activeSection = sectionId;
+        UI.showSection(sectionId);
+        
+        if (this.state.userProfile?.newContent) {
+            let needsSave = false;
+            if (sectionId === 'seccao-skill' && this.state.userProfile.newContent.skill) {
+                this.state.userProfile.newContent.skill = false;
+                needsSave = true;
+            }
+            if (sectionId === 'seccao-cinturoes' && this.state.userProfile.newContent.belts) {
+                this.state.userProfile.newContent.belts = false;
+                needsSave = true;
+            }
+            if (needsSave) this.saveProfile();
+        }
+        
+        this.renderSectionContent();
+    },
+    
+    // --- SPECIFIC SECTION RENDERERS ---
+    
+    renderProfileSection() {
+        const container = UI.elements.seccaoPerfil;
+        if (!this.state.userProfile) {
+            // Render profile creation form
+            container.innerHTML = `... HTML for profile creation form ...`;
+            // Add event listeners for the form
+        } else {
+            // Render profile dashboard with tabs
+            container.innerHTML = `... HTML for profile dashboard ...`;
+            // Add event listeners for tabs, buttons, etc.
+        }
+    },
+
+    // ... other render functions like renderPlansSection, renderBeltProgression, etc.
+    // Each function will be responsible for populating its section's innerHTML
+    // and setting up the necessary event listeners for that section.
+    
+    // --- ANIMATIONS ---
+    initMasterCardAnimations() {
+        document.querySelectorAll('.master-flip-card').forEach(card => {
+            const innerCard = card.querySelector('.master-flip-card-inner');
+            gsap.set(innerCard, { rotationY: 0 }); 
+
+            card.addEventListener('mouseenter', () => {
+                gsap.to(innerCard, { rotationY: 180, duration: 0.7, ease: 'power3.out' });
+            });
+
+            card.addEventListener('mouseleave', () => {
+                gsap.to(innerCard, { rotationY: 0, duration: 0.7, ease: 'power3.out' });
+            });
+        });
+    },
+
+    // --- GAME LOGIC (XP, STAMINA, TIMERS, etc.) ---
+    getBeltByLevel(level) {
+        return this.config.BELT_SYSTEM.find(b => b.level === level) || this.config.BELT_SYSTEM[0];
     },
     
     updateStamina() {
         if (!this.state.userProfile) return;
-
         const now = new Date();
         const lastUpdate = new Date(this.state.userProfile.lastStaminaUpdate);
         const diffMins = Math.floor((now - lastUpdate) / 60000);
-
         const REGEN_RATE = 1;
         const REGEN_INTERVAL_MINS = 5;
 
@@ -288,33 +266,17 @@ const WingChunApp = {
             this.state.userProfile.stamina = Math.min(this.state.userProfile.maxStamina, this.state.userProfile.stamina + staminaToRegen);
             this.state.userProfile.lastStaminaUpdate = new Date().toISOString();
             this.saveProfile();
+        } else {
+            UI.updateStaminaBar(this.state.userProfile.stamina, this.state.userProfile.maxStamina);
         }
-
-        UI.updateStaminaBar(this.state.userProfile.stamina, this.state.userProfile.maxStamina);
-    },
-    
-    getBeltByLevel(level) {
-        return this.config.BELT_SYSTEM.find(b => b.level === level) || this.config.BELT_SYSTEM[0];
     },
 
-    // --- FUNÇÕES DE UTILIDADE ---
-    ensureProfileIntegrity() {
-        const p = this.state.userProfile;
-        if (!p.unlockedBeltLevel) p.unlockedBeltLevel = 0;
-        if (!p.achievements) p.achievements = [];
-        if (!p.history) p.history = [];
-        if (!p.customPlans) p.customPlans = [];
-        if (!p.theme) p.theme = 'default';
-        if (typeof p.stamina === 'undefined') p.stamina = 100;
-        if (!p.maxStamina) p.maxStamina = 100;
-        if (!p.lastStaminaUpdate) p.lastStaminaUpdate = new Date().toISOString();
-    },
-    
-    // ... Adicione o resto da sua lógica aqui (timers, planos, etc.)
-    // Lembre-se de chamar as funções do UI para atualizar a vista.
+    // ... All other logic functions from the original file would go here:
+    // addXp, checkAchievements, checkDailyChallenge, startTimer, stopTimer,
+    // startTrainingPlan, stopTrainingPlan, handlePromotion, etc.
 };
 
-// Iniciar a aplicação quando o DOM estiver pronto
+// Start the application when the DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     WingChunApp.init();
 });

@@ -1,7 +1,7 @@
 /**
  * config.js
- * * Este módulo contém todos os dados estáticos e de configuração para a aplicação Wing Chun.
- * Separar os dados da lógica torna a aplicação mais fácil de manter e atualizar.
+ * This module contains all static data and configuration for the Wing Chun app.
+ * Separating data from logic makes the application easier to maintain and update.
  */
 
 const appData = {
@@ -247,12 +247,29 @@ const appData = {
         { id: "avatar11.png", requiredBelt: 6 }, { id: "avatar12.png", requiredBelt: 6 }
     ],
     ACHIEVEMENTS: {
-        // NOTE: The original file had an empty achievements object. 
-        // This should be populated with your achievement data. Example:
-        // first_steps: { 
-        //     icon: '👣', title: 'Primeiros Passos', desc: 'Completa o teu primeiro treino.', 
-        //     check: (profile) => profile.history.length > 0 
-        // }
+        first_steps: { 
+            icon: '👣', title: 'Primeiros Passos', desc: 'Completa o teu primeiro treino.', 
+            check: (p) => p.history.length > 0 
+        },
+        warrior_spirit: {
+            icon: '🔥', title: 'Espírito Guerreiro', desc: 'Treina por 3 dias seguidos.',
+            check: (p) => p.streak >= 3
+        },
+        persistent: {
+            icon: '💪', title: 'Persistente', desc: 'Acumula 1 hora de treino.',
+            check: (p) => {
+                const totalSeconds = Object.values(p.trainingStats).reduce((acc, val) => acc + (val.totalDuration || 0), 0);
+                return totalSeconds >= 3600;
+            }
+        },
+        yellow_belt: {
+            icon: '🟡', title: 'Caminho Amarelo', desc: 'Alcança o Cinturão Amarelo.',
+            check: (p) => p.unlockedBeltLevel >= 1
+        },
+        collector: {
+            icon: '📚', title: 'Colecionador', desc: 'Desbloqueia 5 conquistas.',
+            check: (p) => p.achievements.length >= 5
+        }
     },
     GREAT_MASTERS_DATA: [
          {
