@@ -257,6 +257,7 @@ export function renderAvatarChoices(elements, userProfile, selectedAvatar, onAva
         if (isUnlocked) {
             img.addEventListener('click', () => onAvatarSelect(avatar.id));
         }
+        elements.avatarChoicesGrid.appendChild(img);
     });
     
     const currentAvatar = appData.AVATAR_LIST.find(a => a.id === selectedAvatar);
@@ -465,14 +466,11 @@ export function showNotification(elements, text, icon = 'ℹ️') {
     elements.notificationIcon.textContent = icon;
     elements.notificationText.textContent = text;
     
-    // This is a trick to restart the animation
+    notification.classList.remove('hidden');
     notification.style.animation = 'none';
     void notification.offsetWidth; 
     notification.style.animation = 'slideInDown 0.5s forwards, fadeOut 0.5s 3.5s forwards';
     
-    notification.classList.remove('hidden');
-    
-    // Use a timer to ensure the 'hidden' class is re-added after the animation
     setTimeout(() => {
         notification.classList.add('hidden');
     }, 4000);
@@ -520,4 +518,62 @@ export function applyTheme(themeKey) {
     const theme = appData.COLOR_THEMES[themeKey] || appData.COLOR_THEMES['default'];
     document.documentElement.style.setProperty('--cor-primaria', theme.primary);
     document.documentElement.style.setProperty('--cor-secundaria', theme.secondary);
+}
+
+/**
+ * Renders the theme picker dots.
+ * @param {Object} elements - The cached DOM elements.
+ * @param {string} currentTheme - The key of the current theme.
+ * @param {Function} onThemeSelect - Callback for when a theme is selected.
+ */
+export function renderThemePicker(elements, currentTheme, onThemeSelect) {
+    const container = elements.themePickerContainer.querySelector('.theme-options');
+    container.innerHTML = '';
+
+    for (const key in appData.COLOR_THEMES) {
+        const theme = appData.COLOR_THEMES[key];
+        const dot = document.createElement('div');
+        dot.className = 'theme-dot';
+        dot.style.background = `linear-gradient(145deg, ${theme.primary}, ${theme.secondary})`;
+        dot.title = theme.name;
+        if (key === currentTheme) {
+            dot.classList.add('active');
+        }
+        dot.addEventListener('click', () => onThemeSelect(key));
+        container.appendChild(dot);
+    }
+}
+
+// --- TIMER UI ---
+
+/**
+ * Sets the progress of a timer's visual ring.
+ * @param {HTMLElement} cardEl - The timer card element.
+ * @param {number} percent - The progress percentage (0-100).
+ */
+export function setTimerProgress(cardEl, percent) {
+    const progressCircle = cardEl.querySelector('.timer-progress-ring__circle');
+    if(!progressCircle) return;
+    const radius = progressCircle.r.baseVal.value;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (percent / 100) * circumference;
+    progressCircle.style.strokeDashoffset = offset;
+}
+
+/**
+ * Resets a timer card to its initial state.
+ * @param {string} timerId - The ID of the timer to reset.
+ */
+export function resetTimerCard(timerId) {
+    const cardEl = document.getElementById(`timer-card-${timerId}`);
+    if (!cardEl) return;
+    
+    cardEl.querySelector('.timer-display').textContent = '00:00';
+    cardEl.querySelector('.start-timer-btn').style.display = 'inline-block';
+    cardEl.querySelector('.stop-timer-btn').style.display = 'none';
+    cardEl.querySelector('.timer-limit-warning').style.display = 'none';
+    setTimerProgress(cardEl, 0);
+    
+    const progressCircle = cardEl.querySelector('.timer-progress-ring__circle');
+    progressCircle.classList.remove('rest-mode');
 }
