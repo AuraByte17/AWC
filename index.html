@@ -5,19 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>App de Treino de Wing Chun | Versão Profissional</title>
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Teko:wght@400;600;700&display=swap"
         rel="stylesheet">
-    <!-- Libraries -->
+
+    <!-- External Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- Custom Stylesheet -->
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <!-- Overlay for the mobile menu -->
+    <!-- Overlay for mobile menu -->
     <div id="mobile-menu-overlay"></div>
 
     <!-- Main application layout -->
@@ -25,26 +30,24 @@
         <!-- Responsive Sidebar -->
         <aside id="app-sidebar" class="app-sidebar">
             <div class="sidebar-header">
-                <img src="https://placehold.co/100x100/e67e22/FFFFFF?text=WC" alt="Wing Chun Logo"
+                <img src="https://placehold.co/100x100/e67e22/FFFFFF?text=WC" alt="Logo de Wing Chun"
                     class="sidebar-logo">
                 <h1 id="app-title" class="sidebar-title">Wing Chun App</h1>
-                <button id="close-menu-btn" class="icon-button close" aria-label="Close menu">
+                <!-- Mobile close button -->
+                <button id="close-menu-btn" class="icon-button close" aria-label="Fechar menu">
                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
             <nav id="navigation-hub" class="sidebar-nav"></nav>
-             <div id="theme-picker-container" class="theme-picker">
-                <h4>Mudar Tema</h4>
-                <div class="theme-options"></div>
-            </div>
         </aside>
 
-        <!-- Main Content Area -->
+        <!-- Main Content -->
         <div class="main-content">
+            <!-- Mobile Header -->
             <header id="mobile-header" class="mobile-header">
-                <button id="open-menu-btn" class="icon-button" aria-label="Open menu">
+                <button id="open-menu-btn" class="icon-button" aria-label="Abrir menu">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
@@ -52,14 +55,15 @@
                 <h2 id="current-section-title" class="mobile-header-title">Perfil</h2>
             </header>
 
+            <!-- User Status Bar -->
             <div id="user-status-display" style="display: none;">
-                <img id="user-status-avatar" src="https://placehold.co/100x100/2c2c2c/ecf0f1?text=U" alt="User Avatar">
+                <img id="user-status-avatar" src="https://placehold.co/100x100/2c2c2c/ecf0f1?text=U" alt="Avatar do Utilizador">
                 <div class="user-info">
                     <span id="user-status-name">Praticante</span>
                     <span id="user-status-belt">Cinturão Branco</span>
                 </div>
                 <div class="progress-bar-wrapper">
-                    <div id="user-progress-bar-text" class="progress-bar-text">0 / 2000 XP</div>
+                    <div id="user-progress-bar-text" class="progress-bar-text">0 / 250 XP</div>
                     <div class="progress-bar-container">
                         <div id="user-progress-bar-fill" class="progress-bar-fill"></div>
                     </div>
@@ -72,18 +76,192 @@
                 </div>
             </div>
 
+            <!-- Scrollable Content Area -->
             <main id="main-content-area" class="main-content-area">
                 <div class="main-content-wrapper">
-                    <!-- All sections will be dynamically rendered here -->
-                    <section id="seccao-perfil" class="seccao visivel"></section>
-                    <section id="seccao-planos" class="seccao"></section>
-                    <section id="seccao-cinturoes" class="seccao"></section>
-                    <section id="seccao-skill" class="seccao"></section>
-                    <section id="seccao-condicionamento" class="seccao"></section>
-                    <section id="seccao-teoria" class="seccao"></section>
-                    <section id="seccao-mestres" class="seccao"></section>
-                    <section id="seccao-glossario" class="seccao"></section>
-                    <section id="seccao-achievements" class="seccao"></section>
+                    <section id="seccao-perfil" class="seccao visivel">
+                        <!-- Profile creation view -->
+                        <div id="perfil-form-view">
+                           <div class="floating-card">
+                                <div class="card-header">
+                                    <h1 class="titulo-seccao">Cria o Teu Perfil</h1>
+                                </div>
+                                <div class="card-content">
+                                    <div class="perfil-form-layout">
+                                        <div class="form-fields">
+                                            <label for="perfil-nome">Nome:</label>
+                                            <input type="text" id="perfil-nome" placeholder="O teu nome de praticante">
+                                            <div class="form-row">
+                                                <div>
+                                                    <label for="perfil-altura">Altura (cm):</label>
+                                                    <input type="number" id="perfil-altura" placeholder="Ex: 175">
+                                                </div>
+                                                <div>
+                                                    <label for="perfil-peso">Peso (kg):</label>
+                                                    <input type="number" id="perfil-peso" step="0.1" placeholder="Ex: 70.5">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-avatar-selection">
+                                            <h3>Escolhe o teu Avatar:</h3>
+                                            <img id="form-avatar-preview" src="https://placehold.co/150x150/2c2c2c/ecf0f1?text=?" alt="Pré-visualização do Avatar">
+                                            <div id="avatar-choices-grid" class="avatar-choices-grid"></div>
+                                        </div>
+                                    </div>
+                                    <button id="guardarPerfilBtn" class="action-button perfil-action-button">Guardar e Começar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Profile dashboard view -->
+                        <div id="perfil-dashboard-view" style="display: none;">
+                            <div class="profile-tabs">
+                                <button class="profile-tab-btn active" data-tab="passaporte">Passaporte</button>
+                                <button class="profile-tab-btn" data-tab="estatisticas">Estatísticas</button>
+                                <button class="profile-tab-btn" data-tab="desafio">Desafio Diário</button>
+                            </div>
+                            <div id="profile-tab-content">
+                                <div id="tab-pane-passaporte" class="profile-tab-pane active">
+                                    <div class="floating-card">
+                                         <div class="card-header">
+                                            <h1 class="titulo-seccao">O Teu Passaporte</h1>
+                                        </div>
+                                        <div class="card-content">
+                                            <div class="passaporte-layout">
+                                                <img id="passaporte-avatar-display" src="https://placehold.co/150x150/2c2c2c/ecf0f1?text=U" alt="Avatar">
+                                                <div class="passaporte-info">
+                                                    <p><strong>Nome:</strong> <span id="passaporte-nome"></span></p>
+                                                    <p><strong>Nível:</strong> <span id="passaporte-belt"></span></p>
+                                                    <p><strong>XP Total:</strong> <span id="passaporte-pontos"></span></p>
+                                                    <p><strong>ID de Aluno:</strong> <span id="student-id-display"></span></p>
+                                                    <p><strong>Altura:</strong> <span id="passaporte-altura"></span> cm</p>
+                                                    <p><strong>Peso:</strong> <span id="passaporte-peso"></span> kg</p>
+                                                    <p><strong>IMC:</strong> <span id="passaporte-imc"></span></p>
+                                                    <p><strong>Sequência:</strong> <span id="passaporte-streak"></span> 🔥</p>
+                                                    <p><strong>Conquistas:</strong> <span id="passaporte-achievements"></span> 🏆</p>
+                                                </div>
+                                            </div>
+                                            <div class="profile-action-buttons">
+                                                <button id="editarPerfilBtn" class="action-button">Editar Perfil</button>
+                                                <button id="exportProfileBtn" class="action-button">Exportar Dados</button>
+                                                <button id="importProfileBtn" class="action-button">Importar Dados</button>
+                                            </div>
+                                            <div id="theme-picker-container" class="theme-picker">
+                                                <h4>Mudar Tema</h4>
+                                                <div class="theme-options"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="tab-pane-estatisticas" class="profile-tab-pane">
+                                    <div class="stats-grid">
+                                        <div class="stat-card">
+                                            <div id="stat-total-xp" class="stat-value">0</div>
+                                            <div class="stat-label">XP Total</div>
+                                        </div>
+                                        <div class="stat-card">
+                                            <div id="stat-total-time" class="stat-value">0m</div>
+                                            <div class="stat-label">Tempo de Treino</div>
+                                        </div>
+                                        <div class="stat-card">
+                                            <div id="stat-fav-exercise" class="stat-value">-</div>
+                                            <div class="stat-label">Exercício Favorito</div>
+                                        </div>
+                                    </div>
+                                    <div id="xp-chart-container" class="floating-card">
+                                        <canvas id="xp-chart"></canvas>
+                                    </div>
+                                </div>
+                                <div id="tab-pane-desafio" class="profile-tab-pane">
+                                     <div id="daily-challenge-card"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <section id="seccao-planos" class="seccao">
+                        <h1 class="titulo-seccao">Planos de Treino</h1>
+                        <div class="profile-tabs">
+                            <button class="profile-tab-btn active" data-tab="recomendado">Recomendados</button>
+                            <button class="profile-tab-btn" data-tab="manual">Manuais</button>
+                        </div>
+                        <div id="planos-tab-content">
+                            <div id="tab-pane-recomendado" class="profile-tab-pane active">
+                                <div class="profile-tabs" id="recommended-plan-categories">
+                                    <button class="profile-tab-btn active" data-category="conditioning">Condicionamento</button>
+                                    <button class="profile-tab-btn" data-category="skill">Skill</button>
+                                    <button class="profile-tab-btn" data-category="mix">Mix</button>
+                                </div>
+                                <div id="recommended-plans-container"></div>
+                            </div>
+                            <div id="tab-pane-manual" class="profile-tab-pane">
+                                <div class="floating-card">
+                                    <div class="card-header"><h2 class="subtitulo-seccao" style="margin:0; border:0;">Criador de Planos Manuais</h2></div>
+                                    <div class="card-content plan-creator-form">
+                                        <div class="form-row">
+                                            <div style="flex-grow: 2;">
+                                                <label for="plan-name-input">Nome do Plano:</label>
+                                                <input type="text" id="plan-name-input" placeholder="Ex: Treino Matinal">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label>Selecionar Exercícios e Duração (em segundos):</label>
+                                            <div id="plan-exercise-selection" class="exercise-selection-grid"></div>
+                                        </div>
+                                        <button id="save-plan-btn" class="action-button">Guardar Plano</button>
+                                    </div>
+                                </div>
+                                <h2 class="subtitulo-seccao">Os Teus Planos Manuais</h2>
+                                <div id="saved-plans-container" class="card-grid"></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="seccao-mestres" class="seccao">
+                        <h1 class="titulo-seccao">Mestres Lendários</h1>
+                        <div id="container-mestres" class="card-grid"></div>
+                    </section>
+
+                    <section id="seccao-teoria" class="seccao">
+                        <h1 class="titulo-seccao">Teoria e Filosofia</h1>
+                        <div id="container-teoria" class="card-prose"></div>
+                    </section>
+
+                    <section id="seccao-cinturoes" class="seccao">
+                        <h1 class="titulo-seccao">Progressão de Cinturões</h1>
+                        <div id="belt-progression-container" class="belt-accordion"></div>
+                    </section>
+
+                    <section id="seccao-skill" class="seccao">
+                        <h1 class="titulo-seccao">Biblioteca de Skill</h1>
+                        <div id="container-skill"></div>
+                    </section>
+
+                    <section id="seccao-condicionamento" class="seccao">
+                        <h1 class="titulo-seccao">Biblioteca de Condicionamento</h1>
+                        <div id="container-condicionamento"></div>
+                    </section>
+
+                    <section id="seccao-glossario" class="seccao">
+                        <h1 class="titulo-seccao">Glossário</h1>
+                        <div class="profile-tabs">
+                            <button class="profile-tab-btn active" data-tab="cinto">Glossário do Cinto</button>
+                            <button class="profile-tab-btn" data-tab="global">Glossário Global</button>
+                        </div>
+                        <div id="glossario-tab-content">
+                            <div id="tab-pane-cinto" class="profile-tab-pane active">
+                                <div id="container-glossario-cinto"></div>
+                            </div>
+                            <div id="tab-pane-global" class="profile-tab-pane">
+                                <div id="container-glossario-global"></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="seccao-achievements" class="seccao">
+                        <h1 class="titulo-seccao">Conquistas</h1>
+                        <div id="achievements-grid" class="card-grid"></div>
+                    </section>
                 </div>
             </main>
         </div>
@@ -101,29 +279,29 @@
     <div id="plan-execution-modal" class="modal">
         <div class="modal-content" style="max-width: 90vw; width: 600px; text-align: center;">
             <h3 id="plan-execution-title"></h3>
-            <div id="plan-execution-timer-display" class="timer-display" style="font-size: 3rem; margin: 1rem 0;">20:00</div>
+            <div id="plan-execution-timer-display" style="font-family: var(--font-destaque); font-size: 3rem; margin: 1rem 0;">20:00</div>
             <div class="progress-bar-container" style="height: 20px; margin-bottom: 1rem;">
-                <div id="plan-execution-progress-bar" class="progress-bar-fill"></div>
+                <div id="plan-execution-progress-bar" class="progress-bar-fill" style="background: var(--cor-descanso);"></div>
             </div>
-            <div id="plan-execution-phase-info"></div>
+            <div id="plan-execution-phase-info" style="margin-bottom: 1rem; color: var(--cor-texto-secundario); font-weight: bold;"></div>
             <div id="plan-execution-current-exercise"></div>
-            <button id="stop-plan-btn" class="action-button">Terminar Sessão</button>
+            <button id="stop-plan-btn" class="action-button" style="margin-top: 1.5rem; background: #c0392b; border-color: #c0392b;">Terminar Sessão</button>
         </div>
     </div>
 
     <div id="onboarding-modal" class="modal">
         <div class="onboarding-content">
-            <h2 id="onboarding-title"></h2>
-            <p id="onboarding-text"></p>
+            <h2 id="onboarding-title">Bem-vindo!</h2>
+            <p id="onboarding-text">Este é um pequeno guia para te ajudar a começar.</p>
             <div class="onboarding-nav">
-                <button id="onboarding-prev-btn" class="action-button">Anterior</button>
+                <button id="onboarding-prev-btn" class="action-button" style="visibility: hidden;">Anterior</button>
                 <div id="onboarding-dots"></div>
                 <button id="onboarding-next-btn" class="action-button">Próximo</button>
             </div>
         </div>
     </div>
 
-    <!-- Notification element -->
+    <!-- Notification -->
     <div id="notification" class="hidden">
         <span id="notification-icon"></span>
         <span id="notification-text"></span>
@@ -132,7 +310,7 @@
     <!-- Hidden file input for import -->
     <input type="file" id="import-file-input" style="display: none;" accept=".json,text/plain">
 
-    <!-- Load the main application module -->
+    <!-- Main Application Script -->
     <script type="module" src="app.js"></script>
 </body>
 
